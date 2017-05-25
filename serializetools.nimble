@@ -2,7 +2,7 @@
 
 version       = "1.0.0"
 author        = "Robert Edwards"
-description   =  Support for serialization of objects"
+description   = "Support for serialization of objects"
 license       = "MIT"
 
 # Dependencies
