@@ -1,4 +1,4 @@
-## Support for 1D arrays (sequences) that start are 1-based
+## Support for 1D arrays (sequences) that are 1-based
 
 type
   Array1dO*[T] = object
