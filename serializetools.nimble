@@ -1,6 +1,6 @@
 # Package
 
-version       = "1.1.0"
+version       = "1.2.1"
 author        = "Robert Edwards"
 description   = "Support for serialization of objects"
 license       = "MIT"
@@ -14,3 +14,4 @@ skipDirs = @["tests"]
 
 task test, "Runs the test suite":
   exec "nim c -r tests/test_xml"
+  exec "nim c -r tests/test_binary"

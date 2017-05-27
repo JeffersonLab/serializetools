@@ -120,7 +120,7 @@ suite "Tests of Binary serialization functions":
     type T = set[char]
     let x: T = {'a'..'g'}
     let bin = serializeBinary(x)
-    writeLine(stdout, "test set[char] bin= " & bin)
+    echo "test set[char] bin= ", printBin(bin)
     let xx = deserializeBinary[T](bin)
     echo "deserializeBinary(set[char])= ", xx
     require(x == xx)
