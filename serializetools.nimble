@@ -1,6 +1,6 @@
 # Package
 
-version       = "1.2.1"
+version       = "1.2.0"
 author        = "Robert Edwards"
 description   = "Support for serialization of objects"
 license       = "MIT"
