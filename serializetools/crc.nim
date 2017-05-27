@@ -12,7 +12,7 @@ proc createCRCTable(): array[256, CRC32] =
       if (rem and 1) > 0: rem = (rem shr 1) xor CRC32(0xedb88320)
       else: rem = rem shr 1
     result[i] = rem
-  echo "Here is the table: ", result.repr
+#  echo "Here is the table: ", result.repr
 
 # Table created at runtime
 ## var crc32table = createCRCTable()
@@ -21,7 +21,7 @@ proc createCRCTable(): array[256, CRC32] =
 const crc32table = createCRCTable()
 
 # Check the representation
-echo crc32table.repr
+#echo crc32table.repr
 
 # The application function
 proc crc32(s:string): CRC32 =
@@ -33,6 +33,9 @@ proc crc32(s:string): CRC32 =
 # String conversion proc $, automatically called by echo
 proc `$`(c: CRC32): string = int64(c).toHex(8)
 
-echo "initCRC32 = ", $initCRC32
-
-echo crc32("The quick brown fox jumps over the lazy dog")
+#--------------------------------------------------------------------------
+# Some basic tests
+when isMainModule:
+  echo "initCRC32 = ", $initCRC32
+  let foo = crc32("The quick brown fox jumps over the lazy dog")
+  assert(foo == 0x414FA339)
