@@ -1,6 +1,8 @@
+## Support for CRC32
+
 import strutils
 
-type CRC32 = uint32
+type CRC32* = uint32
 const initCRC32:uint32 = (0xffff shl 16) or 0xffff
 # const initCRC32:uint32 = CRC32(-1)
 # const initCRC32 = CRC32(-1)
@@ -24,7 +26,8 @@ const crc32table = createCRCTable()
 #echo crc32table.repr
 
 # The application function
-proc crc32(s:string): CRC32 =
+proc crc32*(s:string): CRC32 =
+  ## Compute the CRC32 on the string `s`
   result = initCRC32
   for c in s:
     result = (result shr 8) xor crc32table[(result and 0xff) xor ord(c)]
