@@ -13,5 +13,5 @@ before_install:
   - cd ..
   - nimble install -y
 script:
-  - nim test
+  - nimble test
   
