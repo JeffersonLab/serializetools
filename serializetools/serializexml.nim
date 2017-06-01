@@ -37,10 +37,13 @@ proc storeArrayLeafXML[T](data: T): XmlNode =
 proc doStoreXML[T](name: string, data: T): XmlNode =
   result = newElement(name)
   # Compile-time telephone book. The style of keys varies according to the type
-  when (T is char|bool|SomeNumber|string|set|enum):
+  when (T is char|bool|SomeNumber|set|enum):
     var d: T
     shallowCopy(d, data)
     storeAnyXML(result, toAny(d))
+
+  elif (T is string):
+    result.add(newText(data))
 
   elif (T is Array1dO):
     when (data[0] is SomeNumber):
@@ -69,7 +72,11 @@ proc doStoreXML[T](name: string, data: T): XmlNode =
 
   elif (T is object):
     for k, v in data.fieldPairs:
-      result.add(doStoreXML(k, v))
+      when type(v) is string:
+        if v.len > 0:
+          result.add(doStoreXML(k, v))  # special support for objects - avoid writing empty string members
+      else:
+        result.add(doStoreXML(k, v))
 
   else:
     raise newException(IOError, "doStoreXML: error - unsupported type of output: repr(data)= " & repr(data))
@@ -261,6 +268,9 @@ proc deserializeXML*[T](s: XmlNode, path: string): T =
 #  echo "deserXML:  s.tag= ", s.tag, "  s.kind= ", s.kind, "  path= ", path
 #  echo "deserXML:  s.kind= ", s.kind, "  path= ", path
 #  echo "deserXML:  s= ", s, "  path= ", path
+  if s == nil:
+    raise newException(IOError, "deserialize: xml object is nil")
+
   when (T is char|bool|SomeNumber|string|set|enum):
     if tag(s) != path:
       raise newException(IOError, "deserialize: path= " & path & " does not match XmlNode tag= " & tag(s))
@@ -279,10 +289,15 @@ proc deserializeXML*[T](s: XmlNode, path: string): T =
     if tag(s) != path:
       raise newException(IOError, "deserialize: path= " & path & " does not match XmlNode tag= " & tag(s))
     for k, v in fieldPairs(result):
-      let sk = s.child(k)
-      if sk == nil:
-        raise newException(IOError, "Error in object xml - missing key= " & k)
-      v = deserializeXML[type(v)](sk, k)
+      when type(v) is string:
+        let sk = s.child(k)
+        if sk != nil:
+          v = deserializeXML[type(v)](sk, k)
+      else:
+        let sk = s.child(k)
+        if sk == nil:
+          raise newException(IOError, "Error in object xml - missing key= " & k)
+        v = deserializeXML[type(v)](sk, k)
   elif (T is set):
     deserializeSetXML(s, path, result)
   else: 
@@ -290,5 +305,7 @@ proc deserializeXML*[T](s: XmlNode, path: string): T =
 
 proc deserializeXML*[T](s: XmlNode): T =
   ## reads an XML representation `s` and transforms it to a ``T``.
+  if s == nil:
+    raise newException(IOError, "deserialize: xml object is nil")
   result = deserializeXML[T](s, tag(s))
 

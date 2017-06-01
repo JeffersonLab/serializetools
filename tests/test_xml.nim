@@ -53,6 +53,22 @@ suite "Tests of XML serialization functions":
     echo "deserializeXML(string)= ", xx
     require(x == xx)
 
+  test "Deserialize empty string":
+    var x = ""
+    let xml = serializeXML(x)
+    echo "test string xml= ", xml
+    let xx = deserializeXML[string](xml)
+    echo "deserializeXML(string)= ", xx
+    require(x == xx)
+
+  test "Deserialize uninitialized string":
+    var x:string
+    let xml = serializeXML(x)
+    echo "test string xml= ", xml
+    let xx = deserializeXML[string](xml)
+    echo "deserializeXML(string)= ", xx
+    require(x == xx)
+
   test "Deserialize int32":
     var x: int32 = 17i32
     let xml = serializeXML(x)
