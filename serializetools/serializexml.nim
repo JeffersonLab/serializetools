@@ -83,13 +83,13 @@ proc doStoreXML[T](name: string, data: T): XmlNode =
 
 # Main serialization function with a string
 proc serializeXML*[T](x: T, path: string): XmlNode =
-  ## Serialize data `x` into an XML representation with path = `path`
+  ## Serialize data `x` into an XML representation with path `path`
   doStoreXML(path, x)
 
 
 # Main serialization function
 macro serializeXML*(x: typed): untyped =
-  ## Serialize data `x` into an XML representation. Use 
+  ## Serialize data `x` into an XML representation.
   result = newCall(bindSym"doStoreXML", toStrLit(x), x)
 
 
