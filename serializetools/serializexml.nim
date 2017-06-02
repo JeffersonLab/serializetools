@@ -81,9 +81,15 @@ proc doStoreXML[T](name: string, data: T): XmlNode =
   else:
     raise newException(IOError, "doStoreXML: error - unsupported type of output: repr(data)= " & repr(data))
 
+# Main serialization function with a string
+proc serializeXML*[T](x: T, path: string): XmlNode =
+  ## Serialize data `x` into an XML representation with path = `path`
+  doStoreXML(path, x)
+
+
 # Main serialization function
 macro serializeXML*(x: typed): untyped =
-  ## Serialize data `x` into an XML representation
+  ## Serialize data `x` into an XML representation. Use 
   result = newCall(bindSym"doStoreXML", toStrLit(x), x)
 
 
