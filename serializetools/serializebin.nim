@@ -51,6 +51,15 @@ proc doStoreBinary[T](s: Stream, data: T) =
     shallowCopy(dd, data)
     s.writeData(dd[0].addr, d)
 
+  elif (T is cstring):
+    # write a null-terminated string
+    var dd: T
+    shallowCopy(dd, data)
+    s.writeData(dd[0].addr, data.len)
+    var nn: array[1, char]
+    nn[0] = '\x00'
+    s.writeData(nn[0].addr, 1)
+
   elif (T is Array1dO):
     let d = int32(data.data.len)
     s.write(d)
@@ -156,6 +165,12 @@ proc doLoadBinary*[T](s: Stream, data: var T) =
     let d = s.readInt32()
     data = newString(d)
     discard s.readData(data[0].addr, d)
+
+  elif (T is cstring):
+    var ddata = ""
+    if not s.readLine(ddata):
+      quit("doLoadBinary: some error parsing cstring")
+    data = ddata
 
   elif (T is Array1dO):
     type TT = type(data.data[0])

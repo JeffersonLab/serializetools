@@ -47,6 +47,14 @@ suite "Tests of Binary serialization functions":
     echo "deserializeBinary(string)= ", xx
     require(x == xx)
 
+  test "Deserialize cstring":
+    var x:cstring = "my fred"
+    let bin = serializeBinary(x)
+    echo "test cstring bin= ", printBin(bin)
+    let xx = deserializeBinary[type(x)](bin)
+    echo "deserializeBinary(cstring)= ", xx
+    require(x == xx)
+
   test "Deserialize int32":
     var x: int32 = 17i32
     let bin = serializeBinary(x)
