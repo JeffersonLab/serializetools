@@ -1,6 +1,6 @@
 ## Support for serialization of objects to and from binary
 
-import streams, typeinfo, tables, array1d, endians, strutils
+import streams, typeinfo, tables, array1d, endians, strutils, serialstring
 
 proc doStoreSetBinary(s: Stream, len: int, a: Any) =
   ## reads an XML representation `s` and transforms it to a set[T]
@@ -52,12 +52,21 @@ proc doStoreBinary[T](s: Stream, data: T) =
     s.writeData(dd[0].addr, d)
 
   elif (T is cstring):
-    # write a null-terminated string
+    # write a line-feed terminated string
     var dd: T
     shallowCopy(dd, data)
     s.writeData(dd[0].addr, data.len)
     var nn: array[1, char]
-    nn[0] = '\x00'
+    nn[0] = '\x0a'
+    s.writeData(nn[0].addr, 1)
+
+  elif (T is SerialString):
+    # write a line-feed terminated string
+    var dd: string
+    shallowCopy(dd, string(data))
+    s.writeData(dd[0].addr, data.len)
+    var nn: array[1, char]
+    nn[0] = '\x0a'
     s.writeData(nn[0].addr, 1)
 
   elif (T is Array1dO):
@@ -103,7 +112,6 @@ proc serializeBinary*[T](x: T): string =
 #--------------------------------------------------------------------------
 # Deserialization support
 #
-
 # forward decl
 proc doLoadBinary*[T](s: Stream, data: var T)
   ## reads an Binary representation `s` and transforms it to a ``T``
@@ -171,6 +179,17 @@ proc doLoadBinary*[T](s: Stream, data: var T) =
     if not s.readLine(ddata):
       quit("doLoadBinary: some error parsing cstring")
     data = ddata
+    #var foo = newString(ddata.len)
+    #copyMem(addr(foo[0]), addr(ddata[0]), ddata.len)
+    #data = cstring(foo)
+
+  elif (T is SerialString):
+    var ddata = ""
+    if not s.readLine(ddata):
+      quit("doLoadBinary: some error parsing cstring")
+    #var foo = newString(ddata.len)
+    #copyMem(addr(foo[0]), addr(ddata[0]), ddata.len)
+    data = SerialString(ddata)
 
   elif (T is Array1dO):
     type TT = type(data.data[0])

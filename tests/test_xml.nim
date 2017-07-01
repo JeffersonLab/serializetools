@@ -1,6 +1,6 @@
 ## Test the support for serialization of objects to and from xml
 
-import serializexml, tables, xmltree, array1d
+import serializexml, tables, xmltree, array1d, serialstring
 import unittest
 
 # Helper function to cut down on the redundancy
@@ -51,6 +51,14 @@ suite "Tests of XML serialization functions":
     echo "test string xml= ", xml
     let xx = deserializeXML[string](xml)
     echo "deserializeXML(string)= ", xx
+    require(x == xx)
+
+  test "Deserialize SerialString":
+    var x = SerialString("my fred")
+    let xml = serializeXML(x)
+    echo "test string xml= ", xml
+    let xx = deserializeXML[SerialString](xml)
+    echo "deserializeXML(SerialString)= ", xx
     require(x == xx)
 
   test "Deserialize empty string":
