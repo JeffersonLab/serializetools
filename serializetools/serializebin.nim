@@ -179,16 +179,11 @@ proc doLoadBinary*[T](s: Stream, data: var T) =
     if not s.readLine(ddata):
       quit("doLoadBinary: some error parsing cstring")
     data = ddata
-    #var foo = newString(ddata.len)
-    #copyMem(addr(foo[0]), addr(ddata[0]), ddata.len)
-    #data = cstring(foo)
 
   elif (T is SerialString):
     var ddata = ""
     if not s.readLine(ddata):
       quit("doLoadBinary: some error parsing cstring")
-    #var foo = newString(ddata.len)
-    #copyMem(addr(foo[0]), addr(ddata[0]), ddata.len)
     data = SerialString(ddata)
 
   elif (T is Array1dO):
