@@ -264,13 +264,16 @@ proc doLoadBinary*[T](s: var StringStream, data: var T) =
 
   elif (T is array):
     when declared(niledbDebug): echo "In array T"
+    echo "In array T"
     var d: int32
     doLoadNumber(s, d)
-    when declared(niledbDebug): echo "array: d= ", d, "  size= ", sizeof(d)
+    #when declared(niledbDebug): echo "array: d= ", d, "  size= ", sizeof(d)
+    echo "array: d= ", d, "  len= ", sizeof(data.len)
     assert(d == data.len)
     for i in 0..data.len-1:
       doLoadBinary(s, data[i])
-    when declared(niledbDebug): echo "read array: size= ", sizeof(data)
+    #when declared(niledbDebug): echo "read array: size= ", sizeof(data)
+    echo "read array: size= ", sizeof(data)
 
   elif (T is set):
     when declared(niledbDebug): echo "entering set"
