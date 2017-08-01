@@ -1,6 +1,6 @@
 ## Test the support for serialization of objects to and from xml
 
-import serializebin, tables, array1d, strutils
+import serializebin, tables, array1d, strutils, serialstring
 import unittest
 
 type
@@ -45,6 +45,22 @@ suite "Tests of Binary serialization functions":
     echo "test string bin= ", printBin(bin)
     let xx = deserializeBinary[type(x)](bin)
     echo "deserializeBinary(string)= ", xx
+    require(x == xx)
+
+  test "Deserialize cstring":
+    var x:cstring = "my fred"
+    let bin = serializeBinary(x)
+    echo "test cstring bin= ", printBin(bin)
+    let xx = deserializeBinary[type(x)](bin)
+    echo "deserializeBinary(cstring)= ", xx
+    require(x == xx)
+
+  test "Deserialize SerialString":
+    let x = SerialString("my fred")
+    let bin = serializeBinary(x)
+    echo "test SerialString bin= ", printBin(bin)
+    let xx = deserializeBinary[type(x)](bin)
+    echo "deserializeBinary(SerialString)= ", xx
     require(x == xx)
 
   test "Deserialize int32":

@@ -1,6 +1,6 @@
 ## Support for serialization of objects to and from xml
 
-import xmltree, typeinfo, macros, strutils, tables, array1d
+import xmltree, typeinfo, macros, strutils, tables, array1d, serialstring
 
 proc storeAnyXML(s: XmlNode, a: Any) =
   ## writes the XML representation of the Any `a`.
@@ -42,8 +42,8 @@ proc doStoreXML[T](name: string, data: T): XmlNode =
     shallowCopy(d, data)
     storeAnyXML(result, toAny(d))
 
-  elif (T is string):
-    result.add(newText(data))
+  elif (T is string|SerialString):
+    result.add(newText($data))
 
   elif (T is Array1dO):
     when (data[0] is SomeNumber):
@@ -53,6 +53,13 @@ proc doStoreXML[T](name: string, data: T): XmlNode =
         result.add(doStoreXML("elem", v))
 
   elif (T is Table):
+    for k, v in data.pairs:
+      var ss  = newElement("elem")
+      ss.add(doStoreXML("Key", k))
+      ss.add(doStoreXML("Val", v))
+      result.add(ss)
+
+  elif (T is OrderedTable):
     for k, v in data.pairs:
       var ss  = newElement("elem")
       ss.add(doStoreXML("Key", k))
@@ -72,7 +79,7 @@ proc doStoreXML[T](name: string, data: T): XmlNode =
 
   elif (T is object):
     for k, v in data.fieldPairs:
-      when type(v) is string:
+      when type(v) is string|SerialString:
         if v.len > 0:
           result.add(doStoreXML(k, v))  # special support for objects - avoid writing empty string members
       else:
@@ -269,6 +276,29 @@ proc deserializeTableXML[K,V](s: XmlNode, path: string, val: var Table[K,V]) =
     val.add(k, v)
 
 
+proc deserializeOrderedTableXML[K,V](s: XmlNode, path: string, val: var OrderedTable[K,V]) =
+  ## reads an XML representation `s` and transforms it to a Table[K,V]
+  if tag(s) != path:
+    raise newException(IOError, "OrderedTable: path= " & path & " does not match XmlNode tag= " & tag(s))
+
+  val = initOrderedTable[K,V]()
+  for i in 0..s.len-1:
+    if tag(s[i]) != "elem":
+      raise newException(IOError, "OrderedTable: error reading table: expected key=elem, but found XmlNode tag= " & tag(s) )
+
+    let sk = s[i].child("Key")
+    if sk == nil:
+      raise newException(IOError, "OrderedTable: missing Key")
+    var k: K = deserializeXML[K](sk, "Key")
+
+    let sv = s[i].child("Val")
+    if sv == nil:
+      raise newException(IOError, "OrderedTable: missing Val")
+
+    var v: V = deserializeXML[V](sv, "Val")
+    val.add(k, v)
+
+
 proc deserializeXML*[T](s: XmlNode, path: string): T =
   ## reads an XML representation `s` and transforms it to a ``T``, and check the key is `path`
 #  echo "deserXML:  s.tag= ", s.tag, "  s.kind= ", s.kind, "  path= ", path
@@ -277,7 +307,7 @@ proc deserializeXML*[T](s: XmlNode, path: string): T =
   if s == nil:
     raise newException(IOError, "deserialize: xml object is nil")
 
-  when (T is char|bool|SomeNumber|string|set|enum):
+  when (T is char|bool|SomeNumber|string|SerialString|set|enum):
     if tag(s) != path:
       raise newException(IOError, "deserialize: path= " & path & " does not match XmlNode tag= " & tag(s))
     loadAnyXML(s, toAny(result))
@@ -285,6 +315,8 @@ proc deserializeXML*[T](s: XmlNode, path: string): T =
     deserializeSeqXML(s, path, result.data)
   elif (T is Table):
     deserializeTableXML(s, path, result)
+  elif (T is OrderedTable):
+    deserializeOrderedTableXML(s, path, result)
   elif (T is array):
     deserializeArrayXML(s, path, result)
   elif (T is seq):
@@ -295,7 +327,7 @@ proc deserializeXML*[T](s: XmlNode, path: string): T =
     if tag(s) != path:
       raise newException(IOError, "deserialize: path= " & path & " does not match XmlNode tag= " & tag(s))
     for k, v in fieldPairs(result):
-      when type(v) is string:
+      when type(v) is string|SerialString:
         let sk = s.child(k)
         if sk != nil:
           v = deserializeXML[type(v)](sk, k)
