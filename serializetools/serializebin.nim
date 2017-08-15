@@ -1,6 +1,6 @@
 ## Support for serialization of objects to and from binary
 
-import streams, typeinfo, tables, array1d, endians, strutils, serialstring
+import streams, typeinfo, tables, array1d, endians, strutils, serialstring, array2d
 
 #const niledbDebug = true
 
@@ -78,6 +78,14 @@ proc doStoreBinary[T](s: Stream, data: T) =
     let d = int32(data.data.len)
     doStoreBinary(s, d)
     for v in data.data.items:
+      doStoreBinary(s, v)
+
+  elif (T is Array2d):
+    let dl = int32(data.nrows)
+    let dr = int32(data.ncols)
+    doStoreBinary(s, dl)
+    doStoreBinary(s, dr)
+    for v in items(data):
       doStoreBinary(s, v)
 
   elif (T is Table):
@@ -245,6 +253,17 @@ proc doLoadBinary*[T](s: var StringStream, data: var T) =
     for v in data.data.mitems:
       doLoadBinary(s, v)
     when declared(niledbDebug): echo "Array1dO: data= ", data, "  size= ", sizeof(data)
+
+  elif (T is Array2d):
+    when declared(niledbDebug): echo "entering array2d"
+    type TT = type(data[0,0])
+    var dl, dr: int32
+    doLoadNumber(s, dl)
+    doLoadNumber(s, dr)
+    data = newArray2d[TT](dl,dr)
+    for v in mitems(data):
+      doLoadBinary(s, v)
+    when declared(niledbDebug): echo "Array2d: data= ", data, "  size= ", sizeof(data)
 
   elif (T is Table):
     when declared(niledbDebug): echo "entering table"
