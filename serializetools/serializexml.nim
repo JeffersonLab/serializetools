@@ -42,6 +42,9 @@ proc doStoreXML[T](name: string, data: T): XmlNode =
     shallowCopy(d, data)
     storeAnyXML(result, toAny(d))
 
+  elif (T is XmlNode):
+    result.add(data)
+
   elif (T is string|SerialString):
     result.add(newText($data))
 
@@ -311,6 +314,8 @@ proc deserializeXML*[T](s: XmlNode, path: string): T =
     if tag(s) != path:
       raise newException(IOError, "deserialize: path= " & path & " does not match XmlNode tag= " & tag(s))
     loadAnyXML(s, toAny(result))
+  elif (T is XmlNode):
+    result = s
   elif (T is Array1dO):
     deserializeSeqXML(s, path, result.data)
   elif (T is Table):

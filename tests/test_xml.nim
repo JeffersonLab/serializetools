@@ -191,3 +191,14 @@ suite "Tests of XML serialization functions":
     echo "deserializeXML(map[map])= ", xx
     require(x == xx)
 
+  test "Deserialize XmlNode":
+    type T = XmlNode
+    var xx = @[5, 7, 9, 11, 13]
+    let x = serializeXML(xx)
+    echo "test XmlNode= ", x
+    let xyz = deserializeXML[T](x)
+    echo "deserializeXML(XmlNode)= ", xyz
+    require(x == xyz)
+
+
+
