@@ -43,7 +43,8 @@ proc doStoreXML[T](name: string, data: T): XmlNode =
     storeAnyXML(result, toAny(d))
 
   elif (T is XmlNode):
-    result.add(data)
+    result = data
+    result.tag = name
 
   elif (T is string|SerialString):
     result.add(newText($data))
