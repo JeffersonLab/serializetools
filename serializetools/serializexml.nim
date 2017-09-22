@@ -1,6 +1,8 @@
 ## Support for serialization of objects to and from xml
 
 import xmltree, typeinfo, macros, strutils, tables, array1d, serialstring
+import re, strtabs
+
 
 proc storeAnyXML(s: XmlNode, a: Any) =
   ## writes the XML representation of the Any `a`.
@@ -35,7 +37,9 @@ proc storeArrayLeafXML[T](data: T): XmlNode =
   result = newText(dest)
 
 proc doStoreXML[T](name: string, data: T): XmlNode =
+  ## Generate a XmlNode based on the type of data
   result = newElement(name)
+
   # Compile-time telephone book. The style of keys varies according to the type
   when (T is char|bool|SomeNumber|set|enum):
     var d: T
@@ -46,7 +50,10 @@ proc doStoreXML[T](name: string, data: T): XmlNode =
     result = data
     result.tag = name
 
-  elif (T is string|SerialString):
+  elif (T is string):
+    result.add(newText(data))
+
+  elif (T is SerialString):
     result.add(newText($data))
 
   elif (T is Array1dO):
@@ -353,3 +360,95 @@ proc deserializeXML*[T](s: XmlNode): T =
     raise newException(IOError, "deserialize: xml object is nil")
   result = deserializeXML[T](s, tag(s))
 
+
+#-----------------------------------------------------------------------------------
+# Routines that have been lifted/modified from xmltree
+#
+proc addIndent(result: var string, indent: int) =
+  result.add("\n")
+  for i in 1..indent: result.add(' ')
+
+proc noWhitespace(n: XmlNode): bool =
+  for i in 0..n.len-1:
+    if n[i].kind in {xnText, xnEntity}: return true
+
+proc addNoEscape(result: var string, n: XmlNode, indent = 0, indWidth = 2) =
+  ## adds the textual representation of `n` to `result`.
+  ##
+  ## This code is lifted from  xmltree.nim . However, the "add" is replaced 
+  ## with calls to this version that does not have corresponding calls to `escape`.
+
+  if n == nil: return
+  case n.kind
+  of xnElement:
+    result.add('<')
+    result.add(n.tag)
+    if n.attrsLen > 0:
+      for key, val in pairs(n.attrs):
+        result.add(' ')
+        result.add(key)
+        result.add("=\"")
+        result.add(val)
+        result.add('"')
+    if n.len > 0:
+      result.add('>')
+      if n.len > 1:
+        if noWhitespace(n):
+          # for mixed leaves, we cannot output whitespace for readability,
+          # because this would be wrong. For example: ``a<b>b</b>`` is
+          # different from ``a <b>b</b>``.
+          for i in 0..n.len-1: result.addNoEscape(n[i], indent+indWidth, indWidth)
+        else:
+          for i in 0..n.len-1:
+            result.addIndent(indent+indWidth)
+            result.addNoEscape(n[i], indent+indWidth, indWidth)
+          result.addIndent(indent)
+      else:
+        result.addNoEscape(n[0], indent+indWidth, indWidth)
+      result.add("</")
+      result.add(n.tag)
+      result.add(">")
+    else:
+      result.add(" />")
+  of xnText:
+    result.add(n.text)
+  of xnComment:
+    result.add("<!-- ")
+    result.add(n.text)
+    result.add(" -->")
+  of xnCData:
+    result.add("<![CDATA[")
+    result.add(n.text)
+    result.add("]]>")
+  of xnEntity:
+    result.add('&')
+    result.add(n.text)
+    result.add(';')
+
+
+proc extractXML*(n: XmlNode): string =
+  ## converts `n` into its string representation. No ``<$xml ...$>`` declaration
+  ## is produced, so that the produced XML fragments are composable.
+  ##
+  ## This routine is basically the `$` in xmltree, but we intentially do not `escape`
+  ## the output.
+  result = ""
+  result.addNoEscape(n)
+
+
+#[
+#------------------
+when isMainModule:
+  import streams, xmlparser
+  var x = "foo/fred   ./poodle/dog"
+  let xml = serializeXML(x)
+  echo "test string xml= ", $xml
+  var foo = extractXML(xml)
+  echo "unescaped(string) = ", foo
+  let str = newStringStream(foo)
+  let bar = parseXml(str)
+  let xx = deserializeXML[string](bar)
+  echo "deserializeXML(string)= ", xx
+#------------------
+
+]#
