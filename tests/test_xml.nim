@@ -1,7 +1,7 @@
 ## Test the support for serialization of objects to and from xml
 
 import serializexml, tables, xmltree, array1d, serialstring
-import unittest
+import unittest, xmlparser, streams   # used by unit tests
 
 # Helper function to cut down on the redundancy
 #[
@@ -29,6 +29,7 @@ fred.n ={"yummy": 10, "tasty": 20}.toTable
 
 
 suite "Tests of XML serialization functions":
+
   test "Deserialize bool":
     var x: bool = true
     let xml = serializeXML(x)
@@ -46,10 +47,14 @@ suite "Tests of XML serialization functions":
     require(x == xx)
 
   test "Deserialize string":
-    var x = "my fred"
+    var x = "foo/fred"
     let xml = serializeXML(x)
     echo "test string xml= ", xml
-    let xx = deserializeXML[string](xml)
+    let noescape_string = extractXML(xml)
+    echo "corresponding conversion to string without escapes= ", noescape_string
+    let noescape_stream = newStringStream(noescape_string)
+    let parsed_xml = parseXml(noescape_stream)
+    let xx = deserializeXML[string](parsed_xml)
     echo "deserializeXML(string)= ", xx
     require(x == xx)
 
