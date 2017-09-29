@@ -426,7 +426,7 @@ proc addNoEscape(result: var string, n: XmlNode, indent = 0, indWidth = 2) =
     result.add(';')
 
 
-proc extractXML*(n: XmlNode): string =
+proc xmlToStr*(n: XmlNode): string =
   ## converts `n` into its string representation. No ``<$xml ...$>`` declaration
   ## is produced, so that the produced XML fragments are composable.
   ##

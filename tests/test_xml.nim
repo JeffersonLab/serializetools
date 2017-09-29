@@ -50,7 +50,7 @@ suite "Tests of XML serialization functions":
     var x = "foo/fred"
     let xml = serializeXML(x)
     echo "test string xml= ", xml
-    let noescape_string = extractXML(xml)
+    let noescape_string = xmlToStr(xml)
     echo "corresponding conversion to string without escapes= ", noescape_string
     let noescape_stream = newStringStream(noescape_string)
     let parsed_xml = parseXml(noescape_stream)

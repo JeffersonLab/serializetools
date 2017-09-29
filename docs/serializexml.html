@@ -1225,11 +1225,13 @@ function main() {
     title="deserializeXML[T](s: XmlNode; path: string): T"><wbr />deserialize<wbr />XML<span class="attachedType" style="visibility:hidden"></span></a></li>
   <li><a class="reference" href="#deserializeXML,XmlNode"
     title="deserializeXML[T](s: XmlNode): T"><wbr />deserialize<wbr />XML<span class="attachedType" style="visibility:hidden"></span></a></li>
+  <li><a class="reference" href="#xmlToStr,XmlNode"
+    title="xmlToStr(n: XmlNode): string"><wbr />xml<wbr />To<wbr />Str<span class="attachedType" style="visibility:hidden"></span></a></li>
 
   </ul>
 </li>
 <li>
-  <a class="reference reference-toplevel" href="#16" id="66">Macros</a>
+  <a class="reference reference-toplevel" href="#17" id="67">Macros</a>
   <ul class="simple simple-toc-section">
       <li><a class="reference" href="#serializeXML.m,typed"
     title="serializeXML(x: typed): untyped"><wbr />serialize<wbr />XML<span class="attachedType" style="visibility:hidden"></span></a></li>
@@ -1246,7 +1248,7 @@ function main() {
   <div class="section" id="6">
 <h1><a class="toc-backref" href="#6">Imports</a></h1>
 <dl class="item">
-<a class="reference external" href="xmltree.html">xmltree</a>, <a class="reference external" href="typeinfo.html">typeinfo</a>, <a class="reference external" href="macros.html">macros</a>, <a class="reference external" href="strutils.html">strutils</a>, <a class="reference external" href="tables.html">tables</a>, <a class="reference external" href="array1d.html">array1d</a>, <a class="reference external" href="serialstring.html">serialstring</a>
+<a class="reference external" href="xmltree.html">xmltree</a>, <a class="reference external" href="typeinfo.html">typeinfo</a>, <a class="reference external" href="macros.html">macros</a>, <a class="reference external" href="strutils.html">strutils</a>, <a class="reference external" href="tables.html">tables</a>, <a class="reference external" href="array1d.html">array1d</a>, <a class="reference external" href="serialstring.html">serialstring</a>, <a class="reference external" href="re.html">re</a>, <a class="reference external" href="strtabs.html">strtabs</a>
 </dl></div>
 <div class="section" id="12">
 <h1><a class="toc-backref" href="#12">Procs</a></h1>
@@ -1254,42 +1256,33 @@ function main() {
 <dt id="serializeXML"><a name="serializeXML,T,string"></a><pre><span class="Keyword">proc</span> <span class="Identifier">serializeXML</span><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">x</span><span class="Other">:</span> <span class="Identifier">T</span><span class="Other">;</span> <span class="Identifier">path</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">XmlNode</span></pre></dt>
 <dd>
 Serialize data <cite>x</cite> into an XML representation with path <cite>path</cite>
-&nbsp;&nbsp;<a
-href="/tree/master/serializetools/serializexml.nim#L85"
-class="link-seesrc" target="_blank">Source</a>
-<a href="/edit/devel/serializetools/serializexml.nim#L85" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <dt id="deserializeXML"><a name="deserializeXML,XmlNode,string"></a><pre><span class="Keyword">proc</span> <span class="Identifier">deserializeXML</span><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">s</span><span class="Other">:</span> <span class="Identifier">XmlNode</span><span class="Other">;</span> <span class="Identifier">path</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T</span></pre></dt>
 <dd>
 reads an XML representation <cite>s</cite> and transforms it to a <tt class="docutils literal"><span class="pre">T</span></tt>.
-&nbsp;&nbsp;<a
-href="/tree/master/serializetools/serializexml.nim#L272"
-class="link-seesrc" target="_blank">Source</a>
-<a href="/edit/devel/serializetools/serializexml.nim#L272" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <dt id="deserializeXML"><a name="deserializeXML,XmlNode"></a><pre><span class="Keyword">proc</span> <span class="Identifier">deserializeXML</span><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">s</span><span class="Other">:</span> <span class="Identifier">XmlNode</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T</span></pre></dt>
 <dd>
 reads an XML representation <cite>s</cite> and transforms it to a <tt class="docutils literal"><span class="pre">T</span></tt>.
-&nbsp;&nbsp;<a
-href="/tree/master/serializetools/serializexml.nim#L312"
-class="link-seesrc" target="_blank">Source</a>
-<a href="/edit/devel/serializetools/serializexml.nim#L312" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<dt id="xmlToStr"><a name="xmlToStr,XmlNode"></a><pre><span class="Keyword">proc</span> <span class="Identifier">xmlToStr</span><span class="Other">(</span><span class="Identifier">n</span><span class="Other">:</span> <span class="Identifier">XmlNode</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">string</span> <span class="Other pragmabegin">{.</span><div class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></div><span class="Other pragmaend">.}</span></pre></dt>
+<dd>
+<p>converts <cite>n</cite> into its string representation. No <tt class="docutils literal"><span class="pre">&lt;$xml ...$&gt;</span></tt> declaration is produced, so that the produced XML fragments are composable.</p>
+<p>This routine is basically the <cite>$</cite> in xmltree, but we intentially do not <cite>escape</cite> the output.</p>
+
 
 </dd>
 
 </dl></div>
-<div class="section" id="16">
-<h1><a class="toc-backref" href="#16">Macros</a></h1>
+<div class="section" id="17">
+<h1><a class="toc-backref" href="#17">Macros</a></h1>
 <dl class="item">
 <dt id="serializeXML"><a name="serializeXML.m,typed"></a><pre><span class="Keyword">macro</span> <span class="Identifier">serializeXML</span><span class="Other">(</span><span class="Identifier">x</span><span class="Other">:</span> <span class="Identifier">typed</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">untyped</span></pre></dt>
 <dd>
 Serialize data <cite>x</cite> into an XML representation.
-&nbsp;&nbsp;<a
-href="/tree/master/serializetools/serializexml.nim#L91"
-class="link-seesrc" target="_blank">Source</a>
-<a href="/edit/devel/serializetools/serializexml.nim#L91" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -1302,7 +1295,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small>Made with Nim. Generated: 2017-07-08 13:30:12 UTC</small>
+        <small>Made with Nim. Generated: 2017-09-29 15:10:12 UTC</small>
       </div>
     </div>
   </div>
