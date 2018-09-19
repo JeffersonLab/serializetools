@@ -20,7 +20,7 @@ fred.n ={"yummy": 10, "tasty": 20}.toTable
 proc printBin(x:string): string =
   result = "0x"
   for e in items(x):
-    result.add(toHex(e))
+    result.add(toHex($e))
 
 suite "Tests of Binary serialization functions":
   test "Deserialize bool":
