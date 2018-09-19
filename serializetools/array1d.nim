@@ -6,8 +6,11 @@ type
   Array1dO*[T] = object
     data*: seq[T]
 
-proc `$`*[T](a: Array1dO[T]): string =
-  result = $a.data
+proc newArray1dO*[T](newlen: Natural): Array1dO[T] =
+  result.data = newSeq[T](newlen)
+
+proc setLen*[T](s: var Array1dO[T]; newlen: Natural) =
+  s.setlen(newlen)
 
 proc low*[T](a: Array1dO[T]): int = 
   result = 1
