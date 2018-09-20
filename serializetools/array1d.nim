@@ -10,7 +10,7 @@ proc newArray1dO*[T](newlen: Natural): Array1dO[T] =
   result.data = newSeq[T](newlen)
 
 proc setLen*[T](s: var Array1dO[T]; newlen: Natural) =
-  s.setlen(newlen)
+  s.data.setLen(newlen)
 
 proc low*[T](a: Array1dO[T]): int = 
   result = 1
@@ -18,11 +18,14 @@ proc low*[T](a: Array1dO[T]): int =
 proc high*[T](a: Array1dO[T]): int = 
   result = a.data.len
 
-proc `[]`*[T](a: Array1dO[T], i:Positive): T =
-    result = a.data[i-1]
+proc `[]`*[T](a: Array1dO[T], i: Positive) : T {.inline.} =
+  return a.data[i-1]
 
-proc `[]=`*[T](a: var Array1dO[T], i:Positive): T =
-    result = a.data[i-1]
+proc `[]`*[T](a: var Array1dO[T], i: Positive): var T {.inline.} =
+  return a.data[i-1]
+  
+proc `[]=`*[T](a: var Array1dO[T], i: Positive, val : T) {.inline.} =
+    a.data[i-1] = val
 
 proc hash*[T](x: Array1dO[T]): Hash =
   result = x.data.hash
