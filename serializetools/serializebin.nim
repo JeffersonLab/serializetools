@@ -51,9 +51,10 @@ proc doStoreBinary[T](s: Stream, data: T) =
     when declared(niledbDebug): echo "write string: len= ", data.len
     let d = int32(data.len)
     doStoreBinary(s, d)
-    var dd: T
-    shallowCopy(dd, data)
-    s.writeData(dd[0].addr, d)
+    if d > 0:
+      var dd: T
+      shallowCopy(dd, data)
+      s.writeData(dd[0].addr, d)
     when declared(niledbDebug): echo "write string: ", printBin(data), "  len= ", d
 
   elif (T is cstring):
@@ -225,7 +226,8 @@ proc doLoadBinary*[T](s: var StringStream, data: var T) =
     var d: int32
     doLoadNumber(s, d)
     data = newString(d)
-    discard s.readData(data[0].addr, d)
+    if d > 0:
+      discard s.readData(data[0].addr, d)
     when declared(niledbDebug): echo "string: data= ", data, "  len= ", d, "  size= ", sizeof(data)
 
   elif (T is cstring):
@@ -287,12 +289,12 @@ proc doLoadBinary*[T](s: var StringStream, data: var T) =
     var d: int32
     doLoadNumber(s, d)
     #when declared(niledbDebug): echo "array: d= ", d, "  size= ", sizeof(d)
-    echo "array: d= ", d, "  len= ", sizeof(data.len)
+    #echo "array: d= ", d, "  len= ", sizeof(data.len)
     assert(d == data.len)
     for i in 0..data.len-1:
       doLoadBinary(s, data[i])
     #when declared(niledbDebug): echo "read array: size= ", sizeof(data)
-    echo "read array: size= ", sizeof(data)
+    #echo "read array: size= ", sizeof(data)
 
   elif (T is set):
     when declared(niledbDebug): echo "entering set"
