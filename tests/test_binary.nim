@@ -17,6 +17,26 @@ type
 var fred = Fred(b: true, h: 17, j: "hello world", k: @[1i32,2i32,3i32], f: 1.1, c: 'M', m: {'a'..'g'})
 fred.n ={"yummy": 10, "tasty": 20}.toTable
 
+type
+  KeyParticleOpSeq_t* = object
+    name*:     string            ## Some string label for the operator 
+    smear*:    string            ## Some string label for the smearing of this operator 
+    mom_type*: seq[cint]         ## D-1 Canonical momentum type 
+  
+  KeyParticleOpArr_t* = object
+    name*:     string            ## Some string label for the operator 
+    smear*:    string            ## Some string label for the smearing of this operator 
+    mom_type*: array[0..2, cint] ## D-1 Canonical momentum type 
+
+let cone  = cint(1)
+let czero = cint(0)
+
+#var fredseq = KeyParticleOpSeq_t(name: "foo", smear: "blech", mom_type: @[cone,czero,czero])    
+var fredseq = KeyParticleOpSeq_t(name: "foo", mom_type: @[cone,czero,czero])    
+var fredarr = KeyParticleOpArr_t(name: "foo", smear: "", mom_type: [cone,czero,czero])
+  
+
+
 proc printBin(x:string): string =
   result = "0x"
   for e in items(x):
@@ -47,6 +67,17 @@ suite "Tests of Binary serialization functions":
     echo "deserializeBinary(string)= ", xx
     require(x == xx)
 
+  test "Deserialize null string":
+    echo "Do null string"
+    var x: string
+    echo x
+    echo "okay"
+    let bin = serializeBinary(x)
+    echo "test string bin= ", printBin(bin)
+    let xx = deserializeBinary[type(x)](bin)
+    echo "deserializeBinary(string)= ", xx
+    require(x == xx)
+
   test "Deserialize cstring":
     var x:cstring = "my fred"
     let bin = serializeBinary(x)
@@ -71,12 +102,29 @@ suite "Tests of Binary serialization functions":
     echo "deserializeBinary(int32)= ", xx
     require(x == xx)
 
+  test "Deserialize cint":
+    echo "Do cint"
+    var x: cint = cint(17)
+    let bin = serializeBinary(x)
+    echo "test int32 bin= ", printBin(bin)
+    let xx = deserializeBinary[type(x)](bin)
+    echo "deserializeBinary(cint)= ", xx
+    require(x == xx)
+
   test "Deserialize float":
     var x: float = 17.1
     let bin = serializeBinary(x)
     echo "test float bin= ", printBin(bin)
     let xx = deserializeBinary[type(x)](bin)
     echo "deserializeBinary(float)= ", xx
+    require(x == xx)
+
+  test "Deserialize float32":
+    var x: float32 = 1.1
+    let bin = serializeBinary(x)
+    echo "test float32 bin= ", printBin(bin)
+    let xx = deserializeBinary[type(x)](bin)
+    echo "deserializeBinary(float32)= ", xx
     require(x == xx)
 
   test "Deserialize float64":
@@ -120,6 +168,16 @@ suite "Tests of Binary serialization functions":
     echo "test seq[int] bin= ", printBin(bin)
     let xx = deserializeBinary[T](bin)
     echo "deserializeBinary(seq[int])= ", xx
+    require(x == xx)
+
+  test "Deserialize seq[cint]":
+    echo "Do seq[cint]"
+    type T = seq[cint]
+    var x: T = @[cint(5), cint(7), cint(9), cint(11), cint(13)]
+    let bin = serializeBinary(x)
+    echo "test seq[int] bin= ", printBin(bin)
+    let xx = deserializeBinary[T](bin)
+    echo "deserializeBinary(seq[cint])= ", xx
     require(x == xx)
 
   test "Deserialize Array1dO[int]":
@@ -181,6 +239,26 @@ suite "Tests of Binary serialization functions":
     echo "test object bin= ", printBin(bin)
     let xx = deserializeBinary[T](bin)
     echo "deserializeBinary(object)= ", xx
+    require(x == xx)
+
+  test "Deserialize KeySeq":
+    echo "Do KeySeq"
+    type T = KeyParticleOpSeq_t
+    var x: T = fredseq
+    let bin = serializeBinary(x)
+    echo "test object bin= ", printBin(bin)
+    let xx = deserializeBinary[T](bin)
+    echo "deserializeBinary(partseq)= ", xx
+    require(x == xx)
+
+  test "Deserialize Arr":
+    echo "Do KeyArr"
+    type T = KeyParticleOpArr_t
+    var x: T = fredarr
+    let bin = serializeBinary(x)
+    echo "test object bin= ", printBin(bin)
+    let xx = deserializeBinary[T](bin)
+    echo "deserializeBinary(partarr)= ", xx
     require(x == xx)
 
   test "Deserialize Map[Map]":

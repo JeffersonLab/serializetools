@@ -285,7 +285,6 @@ proc doLoadBinary*[T](s: var StringStream, data: var T) =
 
   elif (T is array):
     when declared(niledbDebug): echo "In array T"
-    echo "In array T"
     var d: int32
     doLoadNumber(s, d)
     #when declared(niledbDebug): echo "array: d= ", d, "  size= ", sizeof(d)
