@@ -19,7 +19,7 @@ proc doStoreBinary[T](s: Stream, data: T) =
   # Compile-time telephone book. 
   when declared(niledbDebug): echo "enter doStoreBin: size= ", sizeof(data)
 
-  when (T is char):
+  when (T is char|byte):
     s.write(data)
 
   elif (T is bool):
@@ -204,7 +204,7 @@ proc doLoadBinary*[T](s: var StringStream, data: var T) =
   # Compile-time telephone book. 
   when declared(niledbDebug): echo "Entering doLoad: size= ", sizeof(data), "  s= ", printBin(s.data)
 
-  when (T is char):
+  when (T is char|byte):
     when declared(niledbDebug): echo "entering char"
     data = s.readChar()
     when declared(niledbDebug): echo "char: data= ", data, "  size= ", sizeof(data)
