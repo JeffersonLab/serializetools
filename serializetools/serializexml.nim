@@ -410,6 +410,8 @@ proc addNoEscape(result: var string, n: XmlNode, indent = 0, indWidth = 2) =
       result.add(">")
     else:
       result.add(" />")
+  of xnVerbatimText:
+    result.add(n.text)
   of xnText:
     result.add(n.text)
   of xnComment:

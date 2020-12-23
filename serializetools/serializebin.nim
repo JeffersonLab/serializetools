@@ -1,6 +1,6 @@
 ## Support for serialization of objects to and from binary
 
-import streams, typeinfo, tables, array1d, endians, strutils, serialstring, array2d
+import streams, typeinfo, tables, array1d, endians, strutils, serialstring, array2d, sqarray2d
 
 #const niledbDebug = true
 
@@ -86,6 +86,12 @@ proc doStoreBinary[T](s: Stream, data: T) =
     let dr = int32(data.ncols)
     doStoreBinary(s, dl)
     doStoreBinary(s, dr)
+    for v in items(data):
+      doStoreBinary(s, v)
+
+  elif (T is SqArray2d):
+    let dl = int32(data.nrows)
+    doStoreBinary(s, dl)
     for v in items(data):
       doStoreBinary(s, v)
 
@@ -266,6 +272,16 @@ proc doLoadBinary*[T](s: var StringStream, data: var T) =
     for v in mitems(data):
       doLoadBinary(s, v)
     when declared(niledbDebug): echo "Array2d: data= ", data, "  size= ", sizeof(data)
+
+  elif (T is SqArray2d):
+    when declared(niledbDebug): echo "entering sqarray2d"
+    type TT = type(data[0,0])
+    var dl: int32
+    doLoadNumber(s, dl)
+    data = newSqArray2d[TT](dl)
+    for v in mitems(data):
+      doLoadBinary(s, v)
+    when declared(niledbDebug): echo "SqArray2d: data= ", data, "  size= ", sizeof(data)
 
   elif (T is Table):
     when declared(niledbDebug): echo "entering table"
