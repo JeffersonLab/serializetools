@@ -1,7 +1,7 @@
 ## Support for serialization of objects to and from xml
 
 import xmltree, typeinfo, macros, strutils, tables, array1d, serialstring
-import re, strtabs
+import strtabs
 
 
 proc storeAnyXML(s: XmlNode, a: Any) =
@@ -284,7 +284,7 @@ proc deserializeTableXML[K,V](s: XmlNode, path: string, val: var Table[K,V]) =
       raise newException(IOError, "Table: missing Val")
 
     var v: V = deserializeXML[V](sv, "Val")
-    val.add(k, v)
+    val[k] = v
 
 
 proc deserializeOrderedTableXML[K,V](s: XmlNode, path: string, val: var OrderedTable[K,V]) =
@@ -307,7 +307,7 @@ proc deserializeOrderedTableXML[K,V](s: XmlNode, path: string, val: var OrderedT
       raise newException(IOError, "OrderedTable: missing Val")
 
     var v: V = deserializeXML[V](sv, "Val")
-    val.add(k, v)
+    val[k] = v
 
 
 proc deserializeXML*[T](s: XmlNode, path: string): T =
