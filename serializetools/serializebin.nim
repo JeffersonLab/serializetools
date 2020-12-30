@@ -202,7 +202,7 @@ proc doLoadTableBinary[K,V](s: var StringStream, val: var Table[K,V]) =
     doLoadBinary(s, k)
     var v:V
     doLoadBinary(s, v)
-    val.add(k,v)
+    val[k] = v
   when declared(niledbDebug): echo "doload Table: val= ", val, "  size= ", sizeof(val)
 
 proc doLoadBinary*[T](s: var StringStream, data: var T) =
